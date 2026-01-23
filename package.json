@@ -10,34 +10,38 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "ipfs:build": "next build",
-    "ipfs:export": "next export",
-    "ipfs:upload": "node ./scripts/ipfs-upload.js",
-    "ipfs:deploy": "npm run ipfs:build && npm run ipfs:export && npm run ipfs:upload"
+    "ipfs:upload": "node ./scripts/deploy-ipfs-simple.js",
+    "ipfs:deploy": "npm run build && npm run ipfs:upload",
+    "deploy:cloudflare": "npm run build && wrangler pages deploy out --project-name=bridge-swift"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.0",
+    "@scure/base": "^1.1.9",
+    "@stacks/network": "^6.17.0",
+    "@stacks/transactions": "^6.17.0",
+    "@tanstack/react-query": "^5.59.0",
+    "micro-packed": "^0.6.3",
     "next": "^15.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "viem": "^2.21.0",
-    "wagmi": "^2.12.0",
-    "@rainbow-me/rainbowkit": "^2.2.0",
-    "@tanstack/react-query": "^5.59.0",
-    "@stacks/transactions": "^6.17.0",
-    "@stacks/network": "^6.17.0",
-    "micro-packed": "^0.6.3",
-    "@scure/base": "^1.1.9"
+    "wagmi": "^2.12.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.0",
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "tailwindcss": "^3.4.0",
-    "postcss": "^8.4.0",
     "autoprefixer": "^10.4.0",
+    "axios": "^1.13.2",
+    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
+    "form-data": "^4.0.5",
     "ipfs-http-client": "^60.0.1",
-    "dotenv": "^16.4.5"
+    "postcss": "^8.4.0",
+    "recursive-fs": "^2.1.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.6.0",
+    "web3.storage": "^4.5.5"
   }
 }
