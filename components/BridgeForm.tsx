@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 import { useBridge } from '@/hooks/useBridge';
 import { useBalances } from '@/hooks/useBalances';
+import { isXReserveSupported, getNetworkName } from '@/lib/contracts';
 import { validateStacksAddressForNetwork, detectStacksNetwork, type StacksNetwork } from '@/lib/encoding';
 import { parseUSDC } from '@/lib/bridge';
 import { StatusPanel } from './StatusPanel';
@@ -17,7 +18,12 @@ export function BridgeForm() {
   const [recipient, setRecipient] = useState('');
   const [currentNetwork] = useState<StacksNetwork>('mainnet'); // TODO: Make this configurable
   const { isConnected } = useAccount();
+  const chainId = useChainId();
   const { usdcFormatted, usdcBalance } = useBalances();
+  
+  // Check if current chain supports xReserve for Stacks bridging
+  const isChainSupported = isXReserveSupported(chainId);
+  const currentChainName = getNetworkName(chainId);
   const { status, error, result, executeBridge, reset, slippage, setSlippage, calculateMinAmountOut } = useBridge();
 
   const MAX_BRIDGE_AMOUNT = 1000;
@@ -29,7 +35,7 @@ export function BridgeForm() {
   const detectedNetwork = recipient ? detectStacksNetwork(recipient) : null;
   const isValidRecipient = addressValidation.valid;
   
-  const canSubmit = isConnected && isValidAmount && isValidRecipient && status === 'idle';
+  const canSubmit = isConnected && isChainSupported && isValidAmount && isValidRecipient && status === 'idle';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +57,29 @@ export function BridgeForm() {
       <div className="rounded-3xl p-[1px] bg-gradient-to-b from-cyan-400/80 via-purple-500/70 to-fuchsia-500/80">
         <form onSubmit={handleSubmit} className="glass-panel rounded-3xl p-6">
         <h2 className="text-lg sm:text-xl font-semibold text-white mb-6">Bridge USDC to Stacks</h2>
+
+        {!isChainSupported && isConnected && (
+          <div className="mb-4 p-4 bg-amber-900/30 border border-amber-600/50 rounded-xl">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <p className="text-amber-300 font-semibold text-sm">Unsupported Network: {currentChainName}</p>
+                <p className="text-amber-200/80 text-xs mt-1">
+                  Circle xReserve for Stacks bridging is only available on <strong>Ethereum mainnet</strong>. 
+                  Please switch your wallet to Ethereum, or first bridge your USDC from {currentChainName} to Ethereum.
+                </p>
+                <a 
+                  href="https://superbridge.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 mt-2"
+                >
+                  Bridge {currentChainName} → Ethereum via Superbridge ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           <div>
@@ -154,7 +183,7 @@ export function BridgeForm() {
             disabled={!canSubmit}
             className="w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 hover:from-cyan-300 hover:via-blue-400 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-cyan-500/20"
           >
-            {!isConnected ? 'Connect Wallet' : 'Bridge to Stacks'}
+            {!isConnected ? 'Connect Wallet' : !isChainSupported ? `Switch to Ethereum` : 'Bridge to Stacks'}
           </button>
         </div>
         </form>

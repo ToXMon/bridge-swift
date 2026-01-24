@@ -25,7 +25,18 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://walletconnect.com https://cloudflare-ipfs.com; connect-src 'self' https://*.alchemy.com https://eth-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com https://arb1.g.alchemy.com https://opt-mainnet.g.alchemy.com https://base-mainnet.g.alchemy.com https://walletconnect.com https://cloudflare-ipfs.com wss://*.alchemy.com wss://eth-mainnet.g.alchemy.com wss://polygon-mainnet.g.alchemy.com wss://arb1.g.alchemy.com wss://opt-mainnet.g.alchemy.com wss://base-mainnet.g.alchemy.com; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-src 'self' https://walletconnect.com; object-src 'none'; base-uri 'self'; form-action 'self';",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.walletconnect.com https://*.walletconnect.org https://cloudflare-ipfs.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
+              "img-src 'self' data: https: blob:",
+              "connect-src 'self' https://*.alchemy.com wss://*.alchemy.com https://*.infura.io wss://*.infura.io https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org https://api.web3modal.org https://pulse.walletconnect.org https://eth.llamarpc.com https://mainnet.base.org https://arb1.arbitrum.io https://mainnet.optimism.io https://rpc.sepolia.org https://api.hiro.so https://eth.merkle.io https://cloudflare-ipfs.com https://*.sentry.io",
+              "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'"
+            ].join('; '),
           },
           {
             key: 'Referrer-Policy',

@@ -18,6 +18,17 @@ function getAllChainConfigs() {
   ];
 }
 
+// Public RPC endpoints for each chain (fallback to reliable public RPCs)
+const RPC_URLS: Record<number, string> = {
+  1: 'https://eth.llamarpc.com',
+  42161: 'https://arb1.arbitrum.io/rpc',
+  10: 'https://mainnet.optimism.io',
+  8453: 'https://mainnet.base.org',
+  137: 'https://polygon-rpc.com',
+  43114: 'https://api.avax.network/ext/bc/C/rpc',
+  11155111: 'https://rpc.sepolia.org',
+};
+
 // Helper function to create clients for all chains
 function createClientsForChains(chainConfigs: typeof NETWORK_CONFIGS[keyof typeof NETWORK_CONFIGS][]) {
   const clients: Record<number, any> = {};
@@ -47,9 +58,10 @@ function createClientsForChains(chainConfigs: typeof NETWORK_CONFIGS[keyof typeo
         chain = sepolia;
     }
     
+    const rpcUrl = RPC_URLS[config.CHAIN_ID];
     clients[config.CHAIN_ID] = createPublicClient({
       chain,
-      transport: http(),
+      transport: http(rpcUrl, { timeout: 10_000 }),
     });
   });
   

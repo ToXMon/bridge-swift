@@ -1,7 +1,7 @@
 export const NETWORK_CONFIGS = {
   ethereum: {
     USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' as const,
-    X_RESERVE: '0xBd3fa81B58Ba92a82136038B25aDec7066af3155' as const,
+    X_RESERVE: '0x8888888199b2Df864bf678259607d6D5EBb4e3Ce' as const, // Official Circle xReserve for Stacks
     CHAIN_ID: 1,
     STACKS_DOMAIN: 10001,
     STACKS_USDCX: 'SP3DX3H4FEYZJZ586MFBS25ZW3HZDMEW92260R2PR.usdcx-v1',
@@ -92,6 +92,15 @@ export function getNetworkName(chainId: number): string {
 
 export function isMainnet(chainId: number): boolean {
   return chainId !== 11155111;
+}
+
+// xReserve for Stacks bridging is ONLY available on Ethereum mainnet and Sepolia testnet
+export function isXReserveSupported(chainId: number): boolean {
+  return chainId === 1 || chainId === 11155111; // Ethereum mainnet or Sepolia
+}
+
+export function getXReserveSupportedChains(): number[] {
+  return [1, 11155111]; // Only Ethereum and Sepolia support xReserve->Stacks
 }
 
 export const CONTRACTS = NETWORK_CONFIGS.sepolia;

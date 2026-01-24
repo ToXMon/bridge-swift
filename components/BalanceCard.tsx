@@ -1,12 +1,16 @@
 'use client';
 
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 import { useBalances } from '@/hooks/useBalances';
+import { getNetworkConfig } from '@/lib/contracts';
 import { BalanceCardSkeleton } from './Skeleton';
 
 export function BalanceCard() {
   const { isConnected } = useAccount();
-  const { ethFormatted, usdcFormatted, isLoading } = useBalances();
+  const chainId = useChainId();
+  const { ethFormatted, usdcFormatted, isLoading, error } = useBalances();
+  
+  const networkConfig = getNetworkConfig(chainId);
 
   if (!isConnected) {
     return (
@@ -26,14 +30,13 @@ export function BalanceCard() {
         <div className="glass-panel rounded-2xl p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-400">ETH</p>
+              <p className="text-xs text-gray-400">ETH ({networkConfig.NAME})</p>
               <p className="text-xl font-semibold text-white mono-text">
                 {parseFloat(ethFormatted).toFixed(4)}
               </p>
             </div>
             <div className="text-right">
-              <div className="h-8 w-16 rounded-md bg-gradient-to-r from-emerald-400/40 to-emerald-400/10" />
-              <p className="text-xs text-emerald-400 mt-1">+2.1%</p>
+              <span className="text-2xl">{networkConfig.ICON}</span>
             </div>
           </div>
         </div>
@@ -43,12 +46,17 @@ export function BalanceCard() {
         <div className="glass-panel rounded-2xl p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-400">USDC</p>
-              <p className="text-xl font-semibold text-white mono-text">{usdcFormatted}</p>
+              <p className="text-xs text-gray-400">USDC ({networkConfig.NAME})</p>
+              {error ? (
+                <p className="text-sm text-amber-400">Unable to load</p>
+              ) : (
+                <p className="text-xl font-semibold text-white mono-text">{usdcFormatted}</p>
+              )}
             </div>
             <div className="text-right">
-              <div className="h-8 w-16 rounded-md bg-gradient-to-r from-rose-500/40 to-rose-500/10" />
-              <p className="text-xs text-rose-400 mt-1">-0.5%</p>
+              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <span className="text-blue-400 text-sm font-bold">$</span>
+              </div>
             </div>
           </div>
         </div>

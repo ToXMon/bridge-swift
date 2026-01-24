@@ -63,9 +63,32 @@ function getEstimatedTime(chainId: number): string {
   return chainEstimates[chainId] || '~5 minutes';
 }
 
-function formatUSD(amount: bigint): string {
+function formatUSDC(amount: bigint): string {
   const decimalAmount = Number(amount) / 1_000_000; // USDC has 6 decimals
   return decimalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatNetworkFeeUSD(feeInWei: bigint, chainId: number): string {
+  // Convert wei to ETH (18 decimals)
+  const feeInEth = Number(feeInWei) / 1e18;
+  // Get approximate native token price (ETH ~$3500, MATIC ~$0.50, AVAX ~$35)
+  const nativeTokenPrice = getNativeTokenPrice(chainId);
+  const feeInUSD = feeInEth * nativeTokenPrice;
+  return feeInUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function getNativeTokenPrice(chainId: number): number {
+  // Approximate prices for network fee estimation
+  const prices: Record<number, number> = {
+    1: 3500,       // ETH
+    42161: 3500,   // Arbitrum (ETH)
+    10: 3500,      // Optimism (ETH)
+    8453: 3500,    // Base (ETH)
+    137: 0.50,     // Polygon (MATIC)
+    43114: 35,     // Avalanche (AVAX)
+    11155111: 3500, // Sepolia (ETH)
+  };
+  return prices[chainId] || 3500;
 }
 
 interface LiveFeeDisplayProps {
@@ -74,8 +97,11 @@ interface LiveFeeDisplayProps {
 }
 
 export function LiveFeeDisplay({ amount, chainId }: LiveFeeDisplayProps) {
+  const currentChainId = useChainId();
+  const activeChainId = chainId || currentChainId;
   const { networkFee, bridgeFee, totalFee, estimatedTime } = useBridgeFee(amount, chainId);
-  const amountAfterFees = amount > totalFee ? amount - totalFee : 0n;
+  // Only subtract bridge fee (in USDC) from amount - network fee is paid separately in native token
+  const amountAfterBridgeFee = amount > bridgeFee ? amount - bridgeFee : 0n;
 
   if (!amount || amount === 0n) {
     return null;
@@ -85,15 +111,15 @@ export function LiveFeeDisplay({ amount, chainId }: LiveFeeDisplayProps) {
     <div className="live-fee-display bg-black/40 rounded-xl p-4 space-y-2 border border-white/5">
       <div className="flex justify-between text-sm">
         <span className="text-gray-300">Network fee</span>
-        <span className="font-mono text-white">${formatUSD(networkFee)}</span>
+        <span className="font-mono text-white">${formatNetworkFeeUSD(networkFee, activeChainId)}</span>
       </div>
       <div className="flex justify-between text-sm">
         <span className="text-gray-300">Bridge fee (0.1%)</span>
-        <span className="font-mono text-white">${formatUSD(bridgeFee)}</span>
+        <span className="font-mono text-white">${formatUSDC(bridgeFee)}</span>
       </div>
       <div className="border-t border-white/10 pt-2 flex justify-between text-sm font-medium">
         <span className="text-gray-200">Total fees</span>
-        <span className="font-mono text-white">${formatUSD(totalFee)}</span>
+        <span className="font-mono text-white">${formatNetworkFeeUSD(networkFee, activeChainId)} + ${formatUSDC(bridgeFee)}</span>
       </div>
       <div className="border-t border-white/10 pt-2 mt-2">
         <div className="flex justify-between text-sm">
@@ -104,7 +130,7 @@ export function LiveFeeDisplay({ amount, chainId }: LiveFeeDisplayProps) {
       <div className="bg-green-900/20 border border-green-700/50 rounded-lg p-3 mt-2">
         <div className="flex justify-between text-sm font-medium">
           <span className="text-green-300">You'll receive</span>
-          <span className="font-mono text-green-300">${formatUSD(amountAfterFees)} USDCx</span>
+          <span className="font-mono text-green-300">${formatUSDC(amountAfterBridgeFee)} USDCx</span>
         </div>
       </div>
     </div>

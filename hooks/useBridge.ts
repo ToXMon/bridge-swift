@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useAccount, usePublicClient, useWalletClient, useChainId } from 'wagmi';
 import { bridgeUSDCToStacks, parseUSDC, type BridgeResult } from '@/lib/bridge';
 import { saveTransaction, detectStacksNetwork, type BridgeTransaction } from '@/lib/transaction-history';
+import { isXReserveSupported, getNetworkName } from '@/lib/contracts';
 import type { Address } from 'viem';
 
 export type BridgeStatus = 'idle' | 'approving' | 'bridging' | 'success' | 'error';
@@ -55,6 +56,14 @@ export function useBridge() {
     async (amount: string, stacksRecipient: string) => {
       if (!address || !walletClient || !publicClient) {
         setError('Please connect your wallet');
+        setStatus('error');
+        return;
+      }
+
+      // Validate that the source chain supports xReserve for Stacks bridging
+      if (!isXReserveSupported(chainId)) {
+        const networkName = getNetworkName(chainId);
+        setError(`${networkName} is not supported for Stacks bridging. Circle xReserve only supports Ethereum mainnet. Please switch to Ethereum or bridge your USDC to Ethereum first.`);
         setStatus('error');
         return;
       }
