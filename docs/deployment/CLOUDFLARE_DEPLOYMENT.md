@@ -36,9 +36,12 @@ Use these **EXACT** settings:
 - **Framework preset**: `Next.js (Static HTML Export)`
 - **Build command**: `npm run build`
 - **Build output directory**: `out`
+- **Deploy command**: `npx wrangler pages deploy out --project-name=bridge-swift`
 - **Root directory**: (leave empty)
 
-⚠️ **CRITICAL**: The build output directory MUST be `out` - this is where Next.js exports static files when using `output: 'export'` in next.config.js
+⚠️ **CRITICAL**: 
+- The build output directory MUST be `out` - this is where Next.js exports static files when using `output: 'export'` in next.config.js
+- The deploy command uses `wrangler pages deploy` (for Pages) NOT `wrangler deploy` (for Workers)
 
 ### Step 4: Add Environment Variables
 

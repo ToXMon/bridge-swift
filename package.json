@@ -12,7 +12,9 @@
     "ipfs:build": "next build",
     "ipfs:upload": "node ./scripts/deploy-ipfs-simple.js",
     "ipfs:deploy": "npm run build && npm run ipfs:upload",
-    "deploy:cloudflare": "npm run build && wrangler pages deploy out --project-name=bridge-swift"
+    "deploy:cloudflare": "npm run build && wrangler pages deploy out --project-name=bridge-swift",
+    "deploy:vercel": "vercel --prod",
+    "deploy:vercel:preview": "vercel"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.0",
@@ -20,6 +22,7 @@
     "@stacks/network": "^6.17.0",
     "@stacks/transactions": "^6.17.0",
     "@tanstack/react-query": "^5.59.0",
+    "canvas-confetti": "^1.9.4",
     "micro-packed": "^0.6.3",
     "next": "^15.0.0",
     "react": "^18.3.0",
@@ -28,6 +31,8 @@
     "wagmi": "^2.12.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
