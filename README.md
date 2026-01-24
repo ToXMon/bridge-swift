@@ -248,4 +248,4 @@ For questions or support:
 
 ---
 
-**Built for DoraHacks Stacks USDCx Hackathon 2024**
+**Built for DoraHacks Stacks USDCx Hackathon 2026**
