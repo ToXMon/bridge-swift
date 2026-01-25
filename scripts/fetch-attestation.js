@@ -15,7 +15,7 @@
  *   npm install viem @noble/hashes
  */
 
-const { createPublicClient, http, decodeEventLog, keccak256 } = require('viem');
+const { createPublicClient, http, keccak256 } = require('viem');
 const { mainnet, sepolia } = require('viem/chains');
 
 // Circle Iris API endpoints
@@ -193,6 +193,14 @@ async function extractMessageHash(txHash, network) {
   // The message bytes are in the data field (ABI-encoded)
   // For a bytes parameter, the first 32 bytes (64 hex chars + 0x) are the offset,
   // next 32 bytes are the length, then the actual message
+  
+  // Note: For production, consider using viem's decodeEventLog with proper ABI:
+  // const decoded = decodeEventLog({
+  //   abi: MESSAGE_SENT_ABI,
+  //   data: messageSentLog.data,
+  //   topics: messageSentLog.topics,
+  // });
+  // However, manual parsing works reliably for this simple case.
   
   const data = messageSentLog.data;
   

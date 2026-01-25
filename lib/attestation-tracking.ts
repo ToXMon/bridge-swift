@@ -95,8 +95,27 @@ export function isTransactionStuck(txHash: string, txTimestamp: number): boolean
 /**
  * Fetch attestation from Circle's Iris API with retry logic
  * 
- * This is a simplified client-side version. For production, this should be
- * moved to a backend service or serverless function to avoid CORS issues.
+ * NOTE: This function makes direct API calls to Circle's Iris API.
+ * When called from a browser, this will fail due to CORS restrictions.
+ * 
+ * For production use, move this to:
+ * 1. Backend API route (e.g., /api/attestations/[messageHash])
+ * 2. Serverless function (Vercel, AWS Lambda, etc.)
+ * 3. Server-side monitoring service
+ * 
+ * Example backend API route:
+ * ```typescript
+ * // app/api/attestations/[messageHash]/route.ts
+ * export async function GET(
+ *   request: Request,
+ *   { params }: { params: { messageHash: string } }
+ * ) {
+ *   const { messageHash } = params;
+ *   const network = new URL(request.url).searchParams.get('network') || 'mainnet';
+ *   const result = await fetchAttestation(messageHash, network);
+ *   return Response.json(result);
+ * }
+ * ```
  */
 export async function fetchAttestation(
   messageHash: string,

@@ -25,9 +25,9 @@ node scripts/fetch-attestation.js 0x5173273d47aea18bc3a19ec279a0250d419c75549a55
 
 ## What This Script Does
 
-1. **Fetches Transaction Receipt**: Gets the Ethereum transaction details
-2. **Extracts Message Hash**: Finds the `MessageSent` event from Circle's CCTP contracts and extracts the message hash
-3. **Queries Circle's Iris API**: Calls `https://iris-api.circle.com/attestations/{messageHash}` with retry logic
+1. **Fetches Transaction Receipt**: Gets the Ethereum transaction details from an RPC endpoint
+2. **Extracts Message Hash**: Finds the `MessageSent` event from Circle's CCTP contracts, parses the ABI-encoded event data, and computes the keccak256 hash of the message bytes
+3. **Queries Circle's Iris API**: Calls `https://iris-api.circle.com/attestations/{messageHash}` with exponential backoff retry logic
 4. **Returns Attestation**: Provides the signed attestation needed to mint USDCx on Stacks
 
 ## Retry Logic Details

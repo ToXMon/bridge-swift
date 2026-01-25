@@ -165,10 +165,18 @@ async function processStuckTransaction(tx) {
   console.log(`   Age: ${Math.floor((Date.now() - new Date(tx.timestamp).getTime()) / 60000)} minutes`);
   
   try {
-    // In a real implementation, we'd extract the message hash from the transaction
-    // For now, we'll use the transaction hash as identifier
-    const messageHash = tx.hash;
+    // IMPORTANT: We need the actual CCTP message hash, not the transaction hash
+    // The message hash should be extracted from the MessageSent event in the transaction
+    // and stored in the transaction history
     
+    if (!tx.messageHash) {
+      console.log(`   ⚠️  Warning: No message hash stored for this transaction`);
+      console.log(`   ℹ️  Run: node scripts/fetch-attestation.js ${tx.hash} --network=${tx.network}`);
+      console.log(`   ℹ️  This will extract the message hash and fetch the attestation`);
+      return { success: false, tx, error: 'Message hash not available' };
+    }
+    
+    const messageHash = tx.messageHash;
     const attestation = await fetchAttestationWithRetry(messageHash, tx.network);
     
     console.log(`   ✅ Attestation retrieved!`);

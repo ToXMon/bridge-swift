@@ -255,6 +255,36 @@ Track metrics:
 
 ### CORS Issues with Circle API
 
+**Important**: The Circle Iris API does not support CORS requests from browsers. This means:
+
+1. ✅ **Backend scripts work**: `fetch-attestation.js` and `monitor-attestations.js` work perfectly when run on a server
+2. ❌ **Browser calls fail**: Direct API calls from `lib/attestation-tracking.ts` will fail with CORS errors
+3. ✅ **Solution**: Deploy the monitoring service on a backend or use API routes
+
+**Recommended Production Setup**:
+```typescript
+// app/api/attestations/[messageHash]/route.ts
+export async function GET(
+  request: Request,
+  { params }: { params: { messageHash: string } }
+) {
+  const { messageHash } = params;
+  const network = new URL(request.url).searchParams.get('network') || 'mainnet';
+  
+  // This runs server-side, no CORS issues
+  const response = await fetch(
+    `https://iris-api.circle.com/attestations/${messageHash}`,
+    { headers: { 'Accept': 'application/json' } }
+  );
+  
+  return Response.json(await response.json());
+}
+```
+
+Then update the frontend to use this API route instead of calling Circle directly.
+
+### CORS Issues with Circle API (Original Section)
+
 If you get CORS errors when calling Circle's API from the browser:
 
 1. Move attestation fetching to a backend API route
