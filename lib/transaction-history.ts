@@ -8,6 +8,9 @@ export interface BridgeTransaction {
   timestamp: number;
   status: 'pending' | 'completed' | 'failed';
   chainId: number;
+  messageHash?: string; // Circle CCTP message hash for attestation tracking
+  attestation?: string; // Attestation signature from Circle
+  attestationAttempts?: number; // Number of attestation fetch attempts
 }
 
 const STORAGE_KEY = 'bridge_swift_tx_history';
