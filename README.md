@@ -15,6 +15,43 @@ Bridge Swift simplifies cross-chain USDC bridging from Ethereum-compatible netwo
 **Live Demo**: [bridge-swift.vercel.app](https://bridge-swift.vercel.app)  
 **Repository**: [github.com/ToXMon/bridge-swift](https://github.com/ToXMon/bridge-swift)
 
+## 🚀 SDK for Developers
+
+**What sets Bridge Swift apart**: A comprehensive TypeScript SDK for building USDC to USDCx bridges for mainnet. This developer-first approach enables seamless integration into any application.
+
+### Quick Start with SDK
+
+```typescript
+import { BridgeSwiftSDK } from '@bridge-swift/sdk';
+
+// Initialize SDK
+const sdk = new BridgeSwiftSDK({ debug: true });
+
+// Execute a bridge in 3 lines
+const result = await sdk.bridge({
+  amount: sdk.parseUSDC('100'),
+  stacksRecipient: 'SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7',
+  account: '0x...',
+  chainId: 1,
+}, publicClient, walletClient);
+
+console.log('Bridge hash:', result.bridgeHash);
+```
+
+### SDK Features
+
+| Feature | Description |
+|---------|-------------|
+| **Simple API** | Bridge USDC to Stacks with minimal code |
+| **Multi-Chain** | Support for 7 EVM networks |
+| **Type-Safe** | Full TypeScript support with comprehensive types |
+| **Fee Estimation** | Accurate gas and protocol fee calculation |
+| **Slippage Protection** | Configurable tolerance (0.1% - 1%) |
+| **Event System** | Track bridge progress with event listeners |
+| **Validation** | Built-in address and amount validation |
+
+📖 **[Full SDK Documentation →](./sdk/README.md)**
+
 ## Problem Statement
 
 Current USDC bridging to Stacks requires:
@@ -37,6 +74,7 @@ Bridge Swift provides a production-ready web application with:
 - **Security-First Design**: Limited token approvals, slippage protection, network validation
 - **Transaction History**: Persistent storage of bridge transactions with explorer links
 - **Gamified Leaderboard**: Community engagement through bridge volume tracking
+- **Developer SDK**: TypeScript SDK for programmatic bridge integration
 
 ### Technical Highlights
 - Circle CCTP (Cross-Chain Transfer Protocol) integration
@@ -44,6 +82,7 @@ Bridge Swift provides a production-ready web application with:
 - Multi-chain balance verification
 - Responsive mobile-first UI
 - Comprehensive error handling and user feedback
+- **Comprehensive test suite with 120+ unit tests**
 
 ## Architecture
 
@@ -58,7 +97,7 @@ Bridge Swift provides a production-ready web application with:
 | Wallet Connection | RainbowKit |
 | Stacks Integration | @stacks/transactions |
 | State Management | TanStack Query |
-| Testing | Playwright |
+| Testing | Playwright + Jest |
 
 ### Smart Contracts
 
@@ -74,24 +113,31 @@ Bridge Swift provides a production-ready web application with:
 ```
 bridge-swift/
 ├── app/                    # Next.js App Router pages
-├── components/            # React components
-│   ├── BridgeForm.tsx     # Main bridge interface
-│   ├── BridgeProgress.tsx # Transaction status tracker
-│   ├── LiveFeeDisplay.tsx # Real-time fee calculation
+├── components/             # React components
+│   ├── BridgeForm.tsx      # Main bridge interface
+│   ├── BridgeProgress.tsx  # Transaction status tracker
+│   ├── LiveFeeDisplay.tsx  # Real-time fee calculation
 │   ├── TransactionHistory.tsx # Historical transactions
 │   └── ...
-├── hooks/                 # Custom React hooks
-│   ├── useBridge.ts       # Bridge operations
-│   ├── useBalances.ts     # Balance fetching
+├── hooks/                  # Custom React hooks
+│   ├── useBridge.ts        # Bridge operations
+│   ├── useBalances.ts      # Balance fetching
 │   └── useMultiChainBalances.ts # Multi-chain support
-├── lib/                   # Core business logic
-│   ├── bridge.ts          # Bridge functions
-│   ├── contracts.ts       # Contract ABIs and addresses
-│   ├── encoding.ts        # Stacks address encoding
-│   ├── fees.ts            # Fee calculations
+├── lib/                    # Core business logic
+│   ├── bridge.ts           # Bridge functions
+│   ├── contracts.ts        # Contract ABIs and addresses
+│   ├── encoding.ts         # Stacks address encoding
+│   ├── fees.ts             # Fee calculations
 │   └── transaction-history.ts # Transaction storage
-├── tests/                 # Playwright tests
-└── docs/                  # Additional documentation
+├── sdk/                    # 🆕 Developer SDK
+│   ├── index.ts            # Main SDK entry point
+│   ├── types.ts            # TypeScript type definitions
+│   ├── config.ts           # Network configurations
+│   ├── utils.ts            # Utility functions
+│   ├── README.md           # SDK documentation
+│   └── __tests__/          # SDK unit tests
+├── tests/                  # Playwright E2E tests
+└── docs/                   # Additional documentation
 ```
 
 ## Getting Started
@@ -157,12 +203,29 @@ NEXT_PUBLIC_ENABLE_TESTNETS=true
 ### Automated Testing
 
 ```bash
-# Run Playwright tests
+# Run E2E tests (Playwright)
 npm run test
+
+# Run SDK unit tests (Jest)
+npm run test:sdk
+
+# Run all unit tests
+npm run test:unit
 
 # Run type checking
 npm run type-check
 ```
+
+#### SDK Test Coverage
+
+The SDK includes comprehensive unit tests covering:
+- ✅ Configuration and network settings (27 tests)
+- ✅ Address validation and encoding (64 tests)
+- ✅ USDC formatting and parsing
+- ✅ Fee and slippage calculations
+- ✅ SDK initialization and methods (32 tests)
+
+**Total: 120+ unit tests**
 
 ## Security Features
 
