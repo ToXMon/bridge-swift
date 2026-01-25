@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { BridgeSwiftSDK, createBridgeSDK, BridgeError } from '../index';
+import { BridgeSwiftSDK, createBridgeSDK, BridgeError, BridgeErrorCode } from '../index';
 
 // Test addresses
 const MAINNET_ADDRESS = 'SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7';
@@ -231,19 +231,19 @@ describe('BridgeSwiftSDK', () => {
 
 describe('BridgeError', () => {
   it('should create error with code and message', () => {
-    const error = new BridgeError('INVALID_AMOUNT' as const, 'Invalid amount');
-    expect(error.code).toBe('INVALID_AMOUNT');
+    const error = new BridgeError(BridgeErrorCode.INVALID_AMOUNT, 'Invalid amount');
+    expect(error.code).toBe(BridgeErrorCode.INVALID_AMOUNT);
     expect(error.message).toBe('Invalid amount');
     expect(error.name).toBe('BridgeError');
   });
 
   it('should include optional details', () => {
-    const error = new BridgeError('INVALID_AMOUNT' as const, 'Invalid amount', { min: 10 });
+    const error = new BridgeError(BridgeErrorCode.INVALID_AMOUNT, 'Invalid amount', { min: 10 });
     expect(error.details).toEqual({ min: 10 });
   });
 
   it('should be instanceof Error', () => {
-    const error = new BridgeError('INVALID_AMOUNT' as const, 'Invalid amount');
+    const error = new BridgeError(BridgeErrorCode.INVALID_AMOUNT, 'Invalid amount');
     expect(error).toBeInstanceOf(Error);
   });
 });

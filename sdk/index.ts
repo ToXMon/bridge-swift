@@ -695,7 +695,6 @@ export type {
   StacksAddressValidation,
   BridgeEvent,
   BridgeEventListener,
-  BridgeErrorCode,
   BridgeTransaction,
   AttestationStatus,
   BridgePhase,
@@ -706,8 +705,8 @@ export type {
   SDKClients,
 } from './types';
 
-// Error class
-export { BridgeError } from './types';
+// Error class and enum
+export { BridgeError, BridgeErrorCode } from './types';
 
 // Configuration
 export { 
