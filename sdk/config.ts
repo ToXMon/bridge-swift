@@ -239,12 +239,18 @@ export function getXReserveSupportedChains(): number[] {
 }
 
 /**
- * Determine if a chain is a Layer 2 network
- * L2s benefit from different fee optimization strategies
+ * Determine if a chain benefits from optimized fee strategies
+ * Includes L2 chains and testnets which typically have faster block times
+ * 
+ * Chains included:
+ * - Base (8453)
+ * - Arbitrum (42161)
+ * - Optimism (10)
+ * - Sepolia testnet (11155111) - included for faster confirmations during testing
  */
 export function isL2Chain(chainId: number): boolean {
-  const l2Chains = [8453, 42161, 10, 11155111]; // Base, Arbitrum, Optimism, Sepolia
-  return l2Chains.includes(chainId);
+  const feeOptimizedChains = [8453, 42161, 10, 11155111]; // Base, Arbitrum, Optimism, Sepolia (testnet)
+  return feeOptimizedChains.includes(chainId);
 }
 
 /**

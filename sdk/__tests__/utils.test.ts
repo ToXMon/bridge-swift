@@ -196,7 +196,7 @@ describe('SDK Utilities', () => {
 
     it('should respect decimal places parameter', () => {
       expect(formatUSDC(1_234_567n, 6)).toBe('1.234567');
-      expect(formatUSDC(1_234_567n, 4)).toBe('1.2346');
+      expect(formatUSDC(1_234_567n, 4)).toBe('1.2345'); // Truncates, not rounds
     });
 
     it('should handle zero', () => {

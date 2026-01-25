@@ -206,6 +206,7 @@ export function validateStacksAddressForNetwork(
 
 /**
  * Format a USDC amount from smallest units to human-readable string
+ * Uses string manipulation to avoid floating-point precision issues.
  * 
  * @param amount - Amount in smallest USDC units (6 decimals)
  * @param decimals - Number of decimal places to show (default: 2)
@@ -219,13 +220,20 @@ export function validateStacksAddressForNetwork(
  * ```
  */
 export function formatUSDC(amount: bigint, decimals: number = 2): string {
-  const divisor = 10 ** BRIDGE_CONSTANTS.USDC_DECIMALS;
-  const value = Number(amount) / divisor;
-  return value.toFixed(decimals);
+  const USDC_DECIMALS = BRIDGE_CONSTANTS.USDC_DECIMALS;
+  const amountStr = amount.toString().padStart(USDC_DECIMALS + 1, '0');
+  const integerPart = amountStr.slice(0, -USDC_DECIMALS) || '0';
+  const decimalPart = amountStr.slice(-USDC_DECIMALS);
+  
+  // Truncate or pad decimal part to requested precision
+  const truncatedDecimal = decimalPart.slice(0, decimals).padEnd(decimals, '0');
+  
+  return `${integerPart}.${truncatedDecimal}`;
 }
 
 /**
  * Parse a human-readable USDC amount to smallest units
+ * Uses string manipulation to avoid floating-point precision issues.
  * 
  * @param amount - Amount string in human-readable format
  * @returns Amount in smallest USDC units
@@ -238,9 +246,31 @@ export function formatUSDC(amount: bigint, decimals: number = 2): string {
  * ```
  */
 export function parseUSDC(amount: string): bigint {
-  const parsed = parseFloat(amount);
-  if (isNaN(parsed) || parsed < 0) return 0n;
-  return BigInt(Math.floor(parsed * 10 ** BRIDGE_CONSTANTS.USDC_DECIMALS));
+  if (!amount || typeof amount !== 'string') return 0n;
+  
+  // Remove any whitespace and validate basic format
+  const cleaned = amount.trim();
+  if (!/^-?\d*\.?\d*$/.test(cleaned) || cleaned === '' || cleaned === '.') {
+    return 0n;
+  }
+  
+  // Handle negative values
+  if (cleaned.startsWith('-')) {
+    return 0n;
+  }
+  
+  const USDC_DECIMALS = BRIDGE_CONSTANTS.USDC_DECIMALS;
+  const parts = cleaned.split('.');
+  const integerPart = parts[0] || '0';
+  const decimalPart = (parts[1] || '').slice(0, USDC_DECIMALS).padEnd(USDC_DECIMALS, '0');
+  
+  // Combine and convert to bigint
+  const combined = integerPart + decimalPart;
+  try {
+    return BigInt(combined);
+  } catch {
+    return 0n;
+  }
 }
 
 /**

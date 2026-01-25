@@ -41,9 +41,8 @@ import type {
   StacksAddressValidation,
   BridgeEvent,
   BridgeEventListener,
-  BridgeErrorCode,
 } from './types';
-import { BridgeError } from './types';
+import { BridgeError, BridgeErrorCode } from './types';
 import { 
   NETWORK_CONFIGS,
   BRIDGE_CONSTANTS, 
@@ -467,7 +466,7 @@ export class BridgeSwiftSDK {
     const amountValidation = validateBridgeAmount(params.amount);
     if (!amountValidation.valid) {
       throw new BridgeError(
-        'INVALID_AMOUNT' as BridgeErrorCode,
+        BridgeErrorCode.INVALID_AMOUNT,
         amountValidation.reason || 'Invalid amount'
       );
     }
@@ -475,7 +474,7 @@ export class BridgeSwiftSDK {
     // Validate Stacks address
     if (!isValidStacksAddress(params.stacksRecipient)) {
       throw new BridgeError(
-        'INVALID_ADDRESS' as BridgeErrorCode,
+        BridgeErrorCode.INVALID_ADDRESS,
         'Invalid Stacks recipient address'
       );
     }
@@ -483,7 +482,7 @@ export class BridgeSwiftSDK {
     // Validate EVM address
     if (!isValidEVMAddress(params.account)) {
       throw new BridgeError(
-        'INVALID_ADDRESS' as BridgeErrorCode,
+        BridgeErrorCode.INVALID_ADDRESS,
         'Invalid EVM account address'
       );
     }
@@ -492,7 +491,7 @@ export class BridgeSwiftSDK {
     if (!isXReserveSupported(params.chainId)) {
       const config = getNetworkConfig(params.chainId);
       throw new BridgeError(
-        'UNSUPPORTED_NETWORK' as BridgeErrorCode,
+        BridgeErrorCode.UNSUPPORTED_NETWORK,
         `${config.NAME} does not support direct bridging to Stacks. Use Ethereum mainnet or Sepolia.`
       );
     }
@@ -502,7 +501,7 @@ export class BridgeSwiftSDK {
     const expectedNetwork = getNetworkConfig(params.chainId).STACKS_NETWORK;
     if (detectedNetwork && detectedNetwork !== expectedNetwork) {
       throw new BridgeError(
-        'NETWORK_MISMATCH' as BridgeErrorCode,
+        BridgeErrorCode.NETWORK_MISMATCH,
         `Stacks address is for ${detectedNetwork} but source chain targets ${expectedNetwork}`
       );
     }
