@@ -15,7 +15,9 @@ hookData (bytes): [empty]
 
 ## Answer: How `remoteToken` Was Passed
 
-The `remoteToken` argument is **NOT** the actual token address. Instead, it's the **encoded Stacks recipient address** in bytes32 format. This is a critical distinction in the Circle CCTP (Cross-Chain Transfer Protocol) bridging process.
+> **Important Note**: The transaction explorer displays this parameter as `remoteToken`, but the actual smart contract ABI parameter name is `remoteRecipient`. Both terms refer to the same parameter.
+
+The `remoteToken` (shown in explorers) / `remoteRecipient` (in ABI) argument is **NOT** the actual token address. Instead, it's the **encoded Stacks recipient address** in bytes32 format. This is a critical distinction in the Circle CCTP (Cross-Chain Transfer Protocol) bridging process.
 
 ### The Encoding Process
 
@@ -48,7 +50,7 @@ export function encodeStacksRecipient(stacksAddress: string): `0x${string}` {
 4. Returns as a hexadecimal string with `0x` prefix
 
 #### Step 3: Passing to Smart Contract
-The encoded bytes32 value is passed as the `remoteRecipient` parameter (which the xReserve contract calls `remoteToken`):
+The encoded bytes32 value is passed as the `remoteRecipient` parameter (which transaction explorers may display as `remoteToken`):
 
 ```typescript
 // From lib/bridge.ts
@@ -68,7 +70,7 @@ export async function executeBridge(
     args: [
       amount,                              // value: uint256
       config.STACKS_DOMAIN,                // remoteDomain: uint32 (10001 for mainnet, 10003 for testnet)
-      remoteRecipient,                     // remoteToken: bytes32 (encoded Stacks address)
+      remoteRecipient,                     // remoteRecipient: bytes32 (encoded Stacks address)
       config.USDC,                         // localToken: address (USDC contract)
       BRIDGE_CONFIG.BRIDGE_FEE_USDC,      // maxFee: uint256 (4800000 = 4.8 USDC)
       BRIDGE_CONFIG.HOOK_DATA,            // hookData: bytes (empty: '0x')
@@ -95,7 +97,7 @@ The xReserve contract's `depositToRemote` function signature:
   inputs: [
     { name: 'value', type: 'uint256' },
     { name: 'remoteDomain', type: 'uint32' },
-    { name: 'remoteRecipient', type: 'bytes32' },  // This is what gets passed as remoteToken
+    { name: 'remoteRecipient', type: 'bytes32' },  // This is the encoded Stacks address
     { name: 'localToken', type: 'address' },
     { name: 'maxFee', type: 'uint256' },
     { name: 'hookData', type: 'bytes' },
@@ -116,8 +118,10 @@ The xReserve contract's `depositToRemote` function signature:
 
 Looking at the specific transaction in IMG_0326.jpeg:
 
-- **remoteToken**: `661237037DC811823D8B2DE17AAABB8EF2AC9B713CA7DB3B01FC7F7BAF7DB562`
+- **remoteToken** (displayed in explorer): `661237037DC811823D8B2DE17AAABB8EF2AC9B713CA7DB3B01FC7F7BAF7DB562`
 - **remoteDomain**: `10001` (Stacks mainnet)
+
+> **Note**: Transaction explorers may display this parameter as `remoteToken`, but the actual smart contract ABI parameter name is `remoteRecipient`. Both refer to the same encoded Stacks address.
 
 This bytes32 value represents an encoded Stacks mainnet address. To decode it:
 - Byte 11 contains the version byte
@@ -143,10 +147,12 @@ USDCx arrives on Stacks at the decoded address
 
 ## Key Files Reference
 
-- **Encoding Logic**: `lib/encoding.ts` and `sdk/utils.ts` (lines 42-49, 6-12)
+- **Encoding Logic**: 
+  - `lib/encoding.ts` (lines 6-12) - Main encoding implementation
+  - `sdk/utils.ts` (lines 42-48) - SDK encoding implementation
 - **Bridge Execution**: `lib/bridge.ts` (lines 147-180)
 - **Contract ABI**: `lib/contracts.ts` (lines 157-172)
-- **Network Configuration**: `lib/contracts.ts` (lines 1-72)
+- **Network Configuration**: `lib/contracts.ts` (lines 1-107)
 
 ## Testing the Encoding
 
@@ -173,7 +179,7 @@ console.log('Bridge hash:', result.bridgeHash);
 
 ## Additional Notes
 
-- The parameter is called `remoteToken` in the contract interface but represents the **recipient address**, not a token address
+- The parameter is called `remoteRecipient` in the contract ABI (though transaction explorers may display it as `remoteToken`) and represents the **recipient address**, not a token address
 - The actual token address (USDC) is passed separately in the `localToken` parameter
 - The encoding ensures that Stacks addresses can be safely transmitted through the Ethereum/CCTP infrastructure
 - This encoding is reversible on the Stacks side, allowing the CCTP protocol to correctly identify the recipient
