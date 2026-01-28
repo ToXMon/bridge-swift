@@ -282,6 +282,10 @@ See `docs/deployment/` folder for detailed deployment guides for each platform.
 
 See `docs/implementation/` folder for detailed implementation notes.
 
+### Technical Documentation
+
+- **[Remote Token Encoding](./docs/REMOTE_TOKEN_ENCODING.md)**: Detailed explanation of how Stacks addresses are encoded to bytes32 format for CCTP bridging
+
 ## Contributing
 
 Contributions are welcome. Please follow these guidelines:
