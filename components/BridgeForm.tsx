@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useAccount, useChainId } from 'wagmi';
 import { useBridge } from '@/hooks/useBridge';
 import { useBalances } from '@/hooks/useBalances';
-import { isXReserveSupported, getNetworkName } from '@/lib/contracts';
-import { validateStacksAddressForNetwork, detectStacksNetwork, type StacksNetwork } from '@/lib/encoding';
+import { isXReserveSupported, getNetworkName, getNetworkConfig } from '@/lib/contracts';
+import { validateStacksAddressForNetwork, detectStacksNetwork } from '@/lib/encoding';
 import { parseUSDC } from '@/lib/bridge';
 import { StatusPanel } from './StatusPanel';
 import { SlippageSelector } from './SlippageSelector';
@@ -16,9 +16,12 @@ import { LiveFeeDisplay } from './LiveFeeDisplay';
 export function BridgeForm() {
   const [amount, setAmount] = useState('');
   const [recipient, setRecipient] = useState('');
-  const [currentNetwork] = useState<StacksNetwork>('mainnet'); // TODO: Make this configurable
   const { isConnected } = useAccount();
   const chainId = useChainId();
+  
+  // Determine the current Stacks network based on the EVM chain
+  const currentNetwork = getNetworkConfig(chainId).STACKS_NETWORK;
+  
   const { usdcFormatted, usdcBalance } = useBalances();
   
   // Check if current chain supports xReserve for Stacks bridging
