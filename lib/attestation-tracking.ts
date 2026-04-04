@@ -47,7 +47,6 @@ export function saveAttestationStatus(status: AttestationStatus): void {
     const trimmed = allStatuses.slice(0, 100);
     localStorage.setItem(ATTESTATION_STORAGE_KEY, JSON.stringify(trimmed));
     
-    console.log('[Attestation Status Saved]', status);
   } catch (error) {
     console.error('[Attestation Status Save Error]', error);
   }
@@ -273,7 +272,6 @@ export function useAttestationMonitoring(enabled: boolean = true) {
     const stuckTxs = getStuckTransactions();
     
     if (stuckTxs.length > 0) {
-      console.log('[Attestation Monitor] Found stuck transactions:', stuckTxs.length);
       
       // Note: This would need the message hash to work properly
       // In a real implementation, you'd need to extract the message hash

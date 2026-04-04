@@ -160,9 +160,6 @@ async function fetchAttestationWithRetry(messageHash, network, config = CONFIG.R
  * Process a stuck transaction
  */
 async function processStuckTransaction(tx) {
-  console.log(`\n🔄 Processing stuck transaction: ${tx.hash}`);
-  console.log(`   Network: ${tx.network}`);
-  console.log(`   Age: ${Math.floor((Date.now() - new Date(tx.timestamp).getTime()) / 60000)} minutes`);
   
   try {
     // IMPORTANT: We need the actual CCTP message hash, not the transaction hash
@@ -170,16 +167,12 @@ async function processStuckTransaction(tx) {
     // and stored in the transaction history
     
     if (!tx.messageHash) {
-      console.log(`   ⚠️  Warning: No message hash stored for this transaction`);
-      console.log(`   ℹ️  Run: node scripts/fetch-attestation.js ${tx.hash} --network=${tx.network}`);
-      console.log(`   ℹ️  This will extract the message hash and fetch the attestation`);
       return { success: false, tx, error: 'Message hash not available' };
     }
     
     const messageHash = tx.messageHash;
     const attestation = await fetchAttestationWithRetry(messageHash, tx.network);
     
-    console.log(`   ✅ Attestation retrieved!`);
     
     // Update transaction with attestation
     tx.attestation = attestation.attestation;
@@ -188,7 +181,6 @@ async function processStuckTransaction(tx) {
     return { success: true, tx };
     
   } catch (error) {
-    console.log(`   ❌ Failed: ${error.message}`);
     
     // Update last attempt time
     tx.lastAttestationAttempt = new Date().toISOString();
@@ -201,22 +193,14 @@ async function processStuckTransaction(tx) {
  * Monitor and process stuck transactions
  */
 async function monitorAttestations() {
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log('🔍 Circle Attestation Monitoring Service');
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log(`\n⏰ Started at: ${new Date().toISOString()}`);
   
   // Load transaction history
   const history = loadTransactionHistory();
-  console.log(`\n📚 Loaded ${history.transactions.length} transactions`);
   
   // Find stuck transactions
   const stuckTxs = findStuckTransactions(history);
-  console.log(`\n⚠️  Found ${stuckTxs.length} stuck transactions`);
   
   if (stuckTxs.length === 0) {
-    console.log(`\n✅ No stuck transactions to process`);
-    console.log('═══════════════════════════════════════════════════════════\n');
     return;
   }
   
@@ -240,14 +224,6 @@ async function monitorAttestations() {
   const successful = results.filter(r => r.success).length;
   const failed = results.filter(r => !r.success).length;
   
-  console.log(`\n═══════════════════════════════════════════════════════════`);
-  console.log('📊 Summary');
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log(`   Total processed: ${results.length}`);
-  console.log(`   ✅ Successful: ${successful}`);
-  console.log(`   ❌ Failed: ${failed}`);
-  console.log(`\n⏰ Completed at: ${new Date().toISOString()}`);
-  console.log('═══════════════════════════════════════════════════════════\n');
   
   // Return results for programmatic use
   return {
@@ -279,7 +255,6 @@ function addTransactionToMonitor(txHash, network, recipient, amount) {
   history.transactions.push(transaction);
   saveTransactionHistory(history);
   
-  console.log(`✅ Added transaction to monitoring: ${txHash}`);
 }
 
 /**
@@ -292,7 +267,6 @@ async function main() {
   if (args[0] === 'add') {
     const [, txHash, network, recipient, amount] = args;
     if (!txHash || !network) {
-      console.log('Usage: node monitor-attestations.js add <tx-hash> <network> [recipient] [amount]');
       process.exit(1);
     }
     addTransactionToMonitor(txHash, network, recipient, amount);

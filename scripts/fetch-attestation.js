@@ -59,13 +59,9 @@ async function fetchAttestationWithRetry(messageHash, network, config = DEFAULT_
   const apiUrl = IRIS_API[network];
   const endpoint = `${apiUrl}/attestations/${messageHash}`;
   
-  console.log(`\n🔄 Fetching attestation from Circle's Iris API...`);
-  console.log(`   Endpoint: ${endpoint}`);
-  console.log(`   Network: ${network}`);
   
   for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
     try {
-      console.log(`\n📡 Attempt ${attempt + 1}/${config.maxRetries + 1}...`);
       
       const response = await fetch(endpoint, {
         method: 'GET',
@@ -76,14 +72,11 @@ async function fetchAttestationWithRetry(messageHash, network, config = DEFAULT_
       
       if (!response.ok) {
         if (response.status === 404) {
-          console.log(`   ⚠️  Attestation not found yet (HTTP 404)`);
         } else {
-          console.log(`   ❌ HTTP Error: ${response.status} ${response.statusText}`);
         }
         
         if (attempt < config.maxRetries) {
           const delay = calculateBackoff(attempt, config);
-          console.log(`   ⏳ Waiting ${delay}ms before retry...`);
           await sleep(delay);
           continue;
         }
@@ -94,16 +87,13 @@ async function fetchAttestationWithRetry(messageHash, network, config = DEFAULT_
       const data = await response.json();
       
       if (data.status === 'complete' && data.attestation) {
-        console.log(`   ✅ Attestation received!`);
         return data;
       }
       
       if (data.status === 'pending') {
-        console.log(`   ⏳ Attestation pending...`);
         
         if (attempt < config.maxRetries) {
           const delay = calculateBackoff(attempt, config);
-          console.log(`   ⏳ Waiting ${delay}ms before retry...`);
           await sleep(delay);
           continue;
         }
@@ -116,9 +106,7 @@ async function fetchAttestationWithRetry(messageHash, network, config = DEFAULT_
         throw error;
       }
       
-      console.log(`   ❌ Error: ${error.message}`);
       const delay = calculateBackoff(attempt, config);
-      console.log(`   ⏳ Waiting ${delay}ms before retry...`);
       await sleep(delay);
     }
   }
@@ -134,14 +122,10 @@ async function fetchAttestationWithRetry(messageHash, network, config = DEFAULT_
  * that Circle's Iris API uses.
  */
 async function extractMessageHash(txHash, network) {
-  console.log(`\n🔍 Analyzing transaction: ${txHash}`);
   
   const chain = network === 'mainnet' ? mainnet : sepolia;
   const rpcEndpoint = RPC_ENDPOINTS[network];
   
-  console.log(`   Network: ${chain.name}`);
-  console.log(`   RPC: ${rpcEndpoint}`);
-  console.log(`   Fetching transaction receipt...`);
   
   const publicClient = createPublicClient({
     chain,
@@ -154,10 +138,6 @@ async function extractMessageHash(txHash, network) {
     throw new Error('Transaction receipt not found');
   }
   
-  console.log(`   ✅ Receipt found`);
-  console.log(`   Status: ${receipt.status}`);
-  console.log(`   Block: ${receipt.blockNumber}`);
-  console.log(`   Logs: ${receipt.logs.length} events`);
   
   if (receipt.status !== 'success') {
     throw new Error('Transaction failed');
@@ -168,7 +148,6 @@ async function extractMessageHash(txHash, network) {
   // Topic[0] = keccak256("MessageSent(bytes)")
   // = 0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036
   
-  console.log(`\n🔎 Searching for MessageSent event...`);
   
   const MESSAGE_SENT_TOPIC = '0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036';
   
@@ -177,18 +156,12 @@ async function extractMessageHash(txHash, network) {
   );
   
   if (!messageSentLog) {
-    console.log(`   ❌ No MessageSent event found`);
-    console.log(`\n   Available event signatures:`);
     const uniqueTopics = [...new Set(receipt.logs.map(log => log.topics[0]))];
     uniqueTopics.forEach(topic => {
-      console.log(`   - ${topic}`);
     });
     throw new Error('MessageSent event not found in transaction logs. This may not be a bridge transaction.');
   }
   
-  console.log(`   ✅ Found MessageSent event`);
-  console.log(`   Log address: ${messageSentLog.address}`);
-  console.log(`   Log data length: ${messageSentLog.data.length} characters`);
   
   // The message bytes are in the data field (ABI-encoded)
   // For a bytes parameter, the first 32 bytes (64 hex chars + 0x) are the offset,
@@ -218,15 +191,11 @@ async function extractMessageHash(txHash, network) {
   const messageEnd = messageStart + (length * 2);
   const messageHex = hexData.slice(messageStart, messageEnd);
   
-  console.log(`   Message offset: ${offset} bytes`);
-  console.log(`   Message length: ${length} bytes`);
-  console.log(`   Message (first 100 chars): 0x${messageHex.substring(0, 100)}...`);
   
   // Calculate message hash using keccak256 from viem
   const messageHashBytes = keccak256(`0x${messageHex}`);
   const messageHash = messageHashBytes;
   
-  console.log(`   📝 Message hash (keccak256): ${messageHash}`);
   
   return messageHash;
 }
@@ -235,20 +204,10 @@ async function extractMessageHash(txHash, network) {
  * Main entry point
  */
 async function main() {
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log('🌉 Circle Attestation Fetcher with Retry Logic');
-  console.log('═══════════════════════════════════════════════════════════');
   
   const args = process.argv.slice(2);
   
   if (args.length === 0) {
-    console.log(`\n❌ Error: Missing transaction hash`);
-    console.log(`\nUsage:`);
-    console.log(`  node scripts/fetch-attestation.js <tx-hash> [--network=mainnet|testnet]`);
-    console.log(`\nExample:`);
-    console.log(`  node scripts/fetch-attestation.js 0x5173...320f --network=mainnet`);
-    console.log(`\nTest mode (using mock message hash):`);
-    console.log(`  node scripts/fetch-attestation.js test --network=mainnet`);
     process.exit(1);
   }
   
@@ -257,7 +216,6 @@ async function main() {
   const network = (networkArg?.split('=')[1] || 'mainnet');
   
   if (network !== 'mainnet' && network !== 'testnet') {
-    console.log(`\n❌ Error: Invalid network. Must be 'mainnet' or 'testnet'`);
     process.exit(1);
   }
   
@@ -266,9 +224,7 @@ async function main() {
     
     // Test mode with mock message hash
     if (txHash === 'test') {
-      console.log(`\n🧪 TEST MODE - Using mock message hash`);
       messageHash = '0x' + '1'.repeat(64); // Mock hash for testing
-      console.log(`   Mock message hash: ${messageHash}`);
     } else {
       // Step 1: Extract message hash from transaction
       messageHash = await extractMessageHash(txHash, network);
@@ -278,42 +234,12 @@ async function main() {
     const attestation = await fetchAttestationWithRetry(messageHash, network);
     
     // Step 3: Display results
-    console.log(`\n═══════════════════════════════════════════════════════════`);
-    console.log('✅ SUCCESS - Attestation Retrieved');
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log(`\n📋 Results:`);
-    console.log(`   Message Hash: ${messageHash}`);
-    console.log(`   Status: ${attestation.status}`);
     if (attestation.attestation) {
-      console.log(`   Attestation: ${attestation.attestation.substring(0, 66)}...`);
-      console.log(`\n💾 Full Attestation:`);
-      console.log(attestation.attestation);
     }
-    console.log(`\n═══════════════════════════════════════════════════════════`);
-    console.log(`\n✨ Next Steps:`);
-    console.log(`   1. Use this attestation to manually trigger the mint on Stacks`);
-    console.log(`   2. Call the receiveMessage function on Stacks with this attestation`);
-    console.log(`   3. Or integrate this retry logic into your bridge monitoring service`);
-    console.log(`\n═══════════════════════════════════════════════════════════\n`);
     
   } catch (error) {
-    console.log(`\n═══════════════════════════════════════════════════════════`);
-    console.log('❌ ERROR');
-    console.log('═══════════════════════════════════════════════════════════`);
-    console.log(`\n${error.message}`);
     if (error.stack && process.env.DEBUG) {
-      console.log(`\nStack trace:\n${error.stack}`);
     }
-    console.log(`\n💡 Troubleshooting:`);
-    console.log(`   - Verify the transaction hash is correct`);
-    console.log(`   - Ensure the transaction is confirmed on ${network}`);
-    console.log(`   - Check that the transaction was a bridge deposit`);
-    console.log(`   - Circle's attestation service may still be processing`);
-    console.log(`   - Try again later if the attestation is still pending`);
-    console.log(`   - Set DEBUG=1 environment variable for full stack traces`);
-    console.log(`\n📚 Documentation:`);
-    console.log(`   See scripts/README.md for detailed usage instructions`);
-    console.log(`\n═══════════════════════════════════════════════════════════\n`);
     process.exit(1);
   }
 }

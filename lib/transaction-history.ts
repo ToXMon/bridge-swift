@@ -22,7 +22,6 @@ export function saveTransaction(tx: BridgeTransaction): void {
   const trimmed = history.slice(0, 50);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
   
-  console.log('[Transaction Saved]', tx);
 }
 
 export function getTransactionHistory(walletAddress?: string): BridgeTransaction[] {
@@ -81,7 +80,6 @@ export function logStacksTransaction(
 ): string {
   const explorerUrl = getHiroExplorerUrl(txId, network);
   
-  console.log('[Stacks Transaction]', {
     txId,
     network,
     amount,

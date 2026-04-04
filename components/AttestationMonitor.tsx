@@ -22,7 +22,6 @@ export function AttestationMonitor({ enabled = true }: { enabled?: boolean }) {
   useEffect(() => {
     if (!enabled || typeof window === 'undefined') return;
     
-    console.log('[Attestation Monitor] Started');
     
     /**
      * Check all transactions and retry stuck ones
@@ -64,7 +63,6 @@ export function AttestationMonitor({ enabled = true }: { enabled?: boolean }) {
           // 3. Use it here to fetch attestation
           
           if (tx.messageHash) {
-            console.log('[Attestation Monitor] Retrying stuck transaction:', tx.evmTxHash);
             
             try {
               await fetchAttestationWithRetry(
@@ -76,8 +74,6 @@ export function AttestationMonitor({ enabled = true }: { enabled?: boolean }) {
               console.error('[Attestation Monitor] Retry failed:', error);
             }
           } else {
-            console.log('[Attestation Monitor] Transaction stuck but no message hash:', tx.evmTxHash);
-            console.log('[Attestation Monitor] Use scripts/fetch-attestation.js to manually retrieve attestation');
           }
         }
       } catch (error) {
@@ -92,7 +88,6 @@ export function AttestationMonitor({ enabled = true }: { enabled?: boolean }) {
     const interval = setInterval(checkAndRetryStuckTransactions, 5 * 60 * 1000);
     
     return () => {
-      console.log('[Attestation Monitor] Stopped');
       clearInterval(interval);
     };
   }, [enabled]);

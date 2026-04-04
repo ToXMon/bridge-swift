@@ -5,13 +5,10 @@ import { useMultiChainBalances, useFormattedMultiChainBalance, useTotalMultiChai
 
 // Test function to verify the multi-chain balance hook works correctly
 export function verifyMultiChainBalances(address: `0x${string}`) {
-  console.log('🔍 Testing Multi-Chain Balance Hook');
-  console.log('Address:', address);
 
   // Test 1: Basic hook functionality
   const { data: balances, isLoading, error } = useMultiChainBalances(address);
   
-  console.log('📊 Balance Data:', {
     isLoading,
     error,
     balanceCount: balances?.size || 0,
@@ -20,14 +17,12 @@ export function verifyMultiChainBalances(address: `0x${string}`) {
 
   // Test 2: Formatted balance for specific chain
   const { balance: ethBalance, formatted: ethFormatted } = useFormattedMultiChainBalance(address, 1);
-  console.log('💰 Ethereum Balance:', {
     raw: ethBalance.toString(),
     formatted: ethFormatted,
   });
 
   // Test 3: Total balance across all chains
   const { totalBalance, totalFormatted, chainCount } = useTotalMultiChainBalance(address);
-  console.log('🌐 Total Balance:', {
     totalRaw: totalBalance.toString(),
     totalFormatted,
     chainsWithBalance: chainCount,
@@ -38,7 +33,6 @@ export function verifyMultiChainBalances(address: `0x${string}`) {
   useMultiChainBalances(address); // This should trigger parallel fetch
   const endTime = performance.now();
   
-  console.log('⚡ Performance Check:', {
     fetchTime: `${(endTime - startTime).toFixed(2)}ms`,
     targetTime: '< 900ms (78% improvement over sequential)',
   });
@@ -73,5 +67,3 @@ export const verificationSteps = [
   '✅ Parallel fetching completes < 900ms',
 ];
 
-console.log('🚀 Multi-Chain Balance Hook Verification Ready');
-console.log('Run verifyMultiChainBalances(address) to test');
