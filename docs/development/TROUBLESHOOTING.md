@@ -24,6 +24,36 @@ The bridge amount was below the required minimum of **10 USDC**. Circle's xReser
 
 ---
 
+### Issue: Wrong Domain Used in Transaction
+
+**Symptoms:**
+- Transaction succeeded on Ethereum/Sepolia
+- No USDCx appears on expected Stacks network
+- Used `remoteDomain: 10001` on Sepolia or vice versa
+
+**Root Cause:**
+The `remoteDomain` parameter did not match the source chain network type:
+- Sepolia (testnet) requires `remoteDomain: 10003`
+- Ethereum mainnet requires `remoteDomain: 10001`
+
+**What Happened:**
+- Your `remoteToken` (encoded Stacks address) was correct ✅
+- Your domain parameter directed funds to the wrong Stacks network ❌
+- The attestation service may have rejected the transaction due to network mismatch
+
+**Solution:**
+See the comprehensive recovery guide: [WRONG_DOMAIN_RECOVERY.md](../WRONG_DOMAIN_RECOVERY.md)
+
+**Quick Actions:**
+1. Contact Circle support with your transaction hash
+2. Check both Stacks mainnet and testnet explorers
+3. Look for any timeout/recovery mechanisms in the xReserve contract
+
+**Prevention:**
+Always use the Bridge Swift UI which automatically sets the correct domain based on your connected network. The codebase handles this automatically via `getNetworkConfig(chainId)`.
+
+---
+
 ### Issue: "Invalid Stacks Address" Error
 
 **Symptoms:**
